@@ -10,30 +10,31 @@ from random import randint
 import serial
 import pygame
 
-
+pygame.init()
 pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=4096)
 
-state = False
 active = False
-fade = 6500
+fade = 10000
 pos = 0
 last = 0
 new = 0
 msg = ''
+trigs = [b'ACTUALIZA\r\n',b'ACTIVO\r\n']
+shuts = [b'PASIVO\r\n',b'MANUAL\r\n',b'ALTO\r\n']
 
-tracks = ['./audio/2mov.mp3','./audio/4mov.mp3']
-ntr = tracks.count()-1
+tracks = ['/home/pi/Desktop/ManzoArt/audio/2mov.mp3','/home/pi/Desktop/ManzoArt/audio/4mov.mp3']
+ntr = len(tracks)-1
 
 btSerial = serial.Serial( "/dev/rfcomm0", baudrate=9600, timeout=1 )
 
 sleep(2)
 
-last = random.randint(0,ntr)
+last = randint(0,ntr)
 pygame.mixer.music.load(tracks[last])
-new = random.randint(0,ntr)
+new = randint(0,ntr)
 
 while new == last:
-    new = random.randint(0,ntr)
+    new = randint(0,ntr)
 
 pygame.mixer.music.queue(tracks[new])
 pygame.mixer.music.set_endevent ( pygame.USEREVENT )
@@ -43,28 +44,26 @@ last=new
 def deactiv():
         global active
         global pos
+        print("Stopping")
         active = False
-        pos = pygame.mixer.music.get_pos()
+        pos = pygame.mixer.music.get_pos()/1000
         pygame.mixer.music.fadeout(fade)
-        
 
 def start():
-        global active
         global pos
+        global active
+        print("Playing ")
         active = True
-        pygame.mixer.music.play(0,pos,fade)
+        pygame.mixer.music.play(loops=0,start=pos,fade_ms=fade)
 
 
 def read_bt():
         global msg
-        print('Received: ' + msg)
-        if "ACTIVO" in msg and not active:
+        global active
+        print('Received: ' + msg.decode('utf-8'))
+        if msg in trigs and not active:
             start()
-        elif "PASIVO" in msg and active:
-            deactiv()
-        elif "ALTO" in msg and active:
-            deactiv()
-        elif "MANUAL" in msg and active:
+        elif msg in shuts and active:
             deactiv()
 
 
@@ -72,9 +71,9 @@ def read_bt():
 while True:
     for event in pygame.event.get():
         if event.type == pygame.USEREVENT:    # A track has ended
-            new = random.randint(0,ntr)
+            new = randint(0,ntr)
             while new == last:
-                new = random.randint(0,ntr)
+                new = randint(0,ntr)
             pygame.mixer.music.queue(tracks[new])
             last=new
     msg = btSerial.readline()
