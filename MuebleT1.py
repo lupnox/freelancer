@@ -9,12 +9,13 @@ from threading import Timer
 from random import randint
 import serial
 import pygame
+import os
 
 pygame.init()
 pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=4096)
 
 active = False
-fade = 10000
+fade = 25000
 pos = 0
 last = 0
 new = 0
@@ -56,7 +57,6 @@ def start():
         active = True
         pygame.mixer.music.play(loops=0,start=pos,fade_ms=fade)
 
-
 def read_bt():
         global msg
         global active
@@ -66,8 +66,11 @@ def read_bt():
         elif msg in shuts and active:
             deactiv()
 
+def send_bt(pump_com):
+        print('sending'+pump_com)
+        btSerial.write(pump_com.encode())
 
-
+send_bt('READY')
 while True:
     for event in pygame.event.get():
         if event.type == pygame.USEREVENT:    # A track has ended
@@ -76,6 +79,10 @@ while True:
                 new = randint(0,ntr)
             pygame.mixer.music.queue(tracks[new])
             last=new
-    msg = btSerial.readline()
-    if len(msg) > 1:
-        read_bt()
+    try:
+        msg = btSerial.readline()
+        if len(msg) > 1:
+            read_bt()
+    except:
+        print("Error con controlador. Reiniciando..")
+       # os.system("sudo reboot")
