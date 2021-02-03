@@ -11,8 +11,8 @@ import serial
 import pygame
 import os
 
+pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=4096)
 pygame.init()
-pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=4096)
 
 active = False
 fade = 25000
@@ -74,6 +74,7 @@ send_bt('READY')
 while True:
     for event in pygame.event.get():
         if event.type == pygame.USEREVENT:    # A track has ended
+            print("NEW QUEUE")
             new = randint(0,ntr)
             while new == last:
                 new = randint(0,ntr)
@@ -85,4 +86,4 @@ while True:
             read_bt()
     except:
         print("Error con controlador. Reiniciando..")
-       # os.system("sudo reboot")
+       #os.system("sudo reboot")
