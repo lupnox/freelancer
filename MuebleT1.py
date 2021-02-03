@@ -31,31 +31,30 @@ btSerial = serial.Serial( "/dev/rfcomm0", baudrate=9600, timeout=1 )
 
 sleep(2)
 
-last = randint(0,ntr)
-pygame.mixer.music.load(tracks[last])
-new = randint(0,ntr)
-
-while new == last:
-    new = randint(0,ntr)
-
-pygame.mixer.music.queue(tracks[new])
 pygame.mixer.music.set_endevent ( pygame.USEREVENT )
-last=new
-
 
 def deactiv():
         global active
         global pos
         print("Stopping")
         active = False
-        pos = pygame.mixer.music.get_pos()/1000
         pygame.mixer.music.fadeout(fade)
 
 def start():
         global pos
         global active
+        global last
+        global new
         print("Playing ")
         active = True
+        last = randint(0,ntr)
+        pygame.mixer.music.load(tracks[last])
+        new = randint(0,ntr)
+        while new == last:
+            new = randint(0,ntr)
+
+        last = new
+        pygame.mixer.music.queue(tracks[new])
         pygame.mixer.music.play(loops=0,start=pos,fade_ms=fade)
 
 def read_bt():
@@ -68,7 +67,7 @@ def read_bt():
             deactiv()
 
 def send_bt(pump_com):
-        print('sending'+pump_com)
+        print('Sending: '+pump_com)
         btSerial.write(pump_com.encode())
 
 send_bt('READY')
