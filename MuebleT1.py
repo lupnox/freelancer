@@ -11,8 +11,9 @@ import serial
 import pygame
 import os
 
+
+pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=4096)
 pygame.init()
-pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=4096)
 
 active = False
 fade = 25000
@@ -23,7 +24,7 @@ msg = ''
 trigs = [b'ACTUALIZA\r\n',b'ACTIVO\r\n']
 shuts = [b'PASIVO\r\n',b'MANUAL\r\n',b'ALTO\r\n']
 
-tracks = ['/home/pi/Desktop/ManzoArt/audio/2mov.mp3','/home/pi/Desktop/ManzoArt/audio/4mov.mp3']
+tracks = ['/home/pi/Desktop/ManzoArt/audio/2mov1.wav','/home/pi/Desktop/ManzoArt/audio/2mov2.wav','/home/pi/Desktop/ManzoArt/audio/2mov3.wav','/home/pi/Desktop/ManzoArt/audio/2mov4.wav','/home/pi/Desktop/ManzoArt/audio/4mov1.wav','/home/pi/Desktop/ManzoArt/audio/4mov2.wav']
 ntr = len(tracks)-1
 
 btSerial = serial.Serial( "/dev/rfcomm0", baudrate=9600, timeout=1 )
@@ -74,6 +75,7 @@ send_bt('READY')
 while True:
     for event in pygame.event.get():
         if event.type == pygame.USEREVENT:    # A track has ended
+            print('NEW QUEUE')
             new = randint(0,ntr)
             while new == last:
                 new = randint(0,ntr)
